@@ -31,7 +31,7 @@
   /* ---------- slider base ---------- */
   .ba{position:relative; aspect-ratio:3/2; border-radius:14px; overflow:hidden;
       border:1px solid var(--line); background:#000; cursor:ew-resize;
-      touch-action:pan-y; user-select:none; -webkit-user-select:none;}
+      touch-action:none; user-select:none; -webkit-user-select:none;}
   .ba img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover;
           pointer-events:none; -webkit-user-drag:none;}
   .ba-before{will-change:clip-path;}
@@ -190,7 +190,8 @@ function buildSlider(root, v){
     '<span class="ba-tag tag-after">Edited</span>';
   const before = root.querySelector('.ba-before');
   const divider = root.querySelector('.ba-divider');
-  let pos = .5, dragging = false, moved = 0, downX = 0, downT = 0, raf = 0, glideAnim = null;
+  let pos = .5, dragging = false, mode = null, moved = 0, raf = 0, glideAnim = null, scrollAnim = null;
+  let sx = 0, sy = 0, downT = 0, sScrollY = 0, trail = [];
   function paint(){
     raf = 0;
     const w = root.clientWidth, x = pos * w;
@@ -208,25 +209,60 @@ function buildSlider(root, v){
     };
     glideAnim = requestAnimationFrame(step);
   }
+  function momentum(v){
+    let last = performance.now();
+    const maxY = () => document.documentElement.scrollHeight - window.innerHeight;
+    const step = t => {
+      const dt = Math.min(50, t - last); last = t;
+      let y = window.scrollY + v * dt;
+      v *= Math.pow(0.94, dt / 16.7);
+      if(y <= 0){ y = 0; v = 0; } else if(y >= maxY()){ y = maxY(); v = 0; }
+      window.scrollTo(0, y);
+      scrollAnim = Math.abs(v) > 0.05 ? requestAnimationFrame(step) : null;
+    };
+    scrollAnim = requestAnimationFrame(step);
+  }
   root.addEventListener('pointerdown', e => {
     if(glideAnim){ cancelAnimationFrame(glideAnim); glideAnim = null; }
-    dragging = true; moved = 0; downX = e.clientX; downT = performance.now();
+    if(scrollAnim){ cancelAnimationFrame(scrollAnim); scrollAnim = null; }
+    dragging = true; mode = null; moved = 0;
+    sx = e.clientX; sy = e.clientY; downT = performance.now();
+    trail = [{y: e.clientY, t: downT}];
     try{ root.setPointerCapture(e.pointerId); }catch(err){}
     root.classList.add('dragging');
   });
   root.addEventListener('pointermove', e => {
     if(!dragging) return;
-    moved = Math.max(moved, Math.abs(e.clientX - downX));
-    pos = clamp((e.clientX - root.getBoundingClientRect().left) / root.clientWidth, .02, .98);
-    if(!raf) raf = requestAnimationFrame(paint);
+    const dx = e.clientX - sx, dy = e.clientY - sy;
+    moved = Math.max(moved, Math.hypot(dx, dy));
+    if(!mode && moved > 12){
+      mode = Math.abs(dx) > Math.abs(dy) ? 'slider' : 'scroll';
+      if(mode === 'scroll') sScrollY = window.scrollY;
+    }
+    if(mode === 'slider'){
+      pos = clamp((e.clientX - root.getBoundingClientRect().left) / root.clientWidth, .02, .98);
+      if(!raf) raf = requestAnimationFrame(paint);
+    } else if(mode === 'scroll'){
+      window.scrollTo(0, sScrollY - (e.clientY - sy));
+      trail.push({y: e.clientY, t: performance.now()});
+      if(trail.length > 6) trail.shift();
+    }
   });
   const end = e => {
     if(!dragging) return;
-    if(moved < 6 && performance.now() - downT < 300) glideTo(e.clientX);
     dragging = false; root.classList.remove('dragging');
+    if(mode === 'slider' || (mode === null && moved < 6)){
+      if(moved < 6 && performance.now() - downT < 300) glideTo(e.clientX);
+    } else if(mode === 'scroll' && trail.length >= 2){
+      const a = trail[0], b = trail[trail.length - 1], dt = b.t - a.t;
+      let v = dt > 0 ? -((b.y - a.y) / dt) : 0;
+      v = clamp(v, -3, 3);
+      if(Math.abs(v) > 0.15) momentum(v);
+    }
+    mode = null;
   };
   root.addEventListener('pointerup', end);
-  root.addEventListener('pointercancel', () => { dragging = false; root.classList.remove('dragging'); });
+  root.addEventListener('pointercancel', () => { dragging = false; mode = null; root.classList.remove('dragging'); });
   root.setAttribute('tabindex','0');
   root.setAttribute('role','slider');
   root.setAttribute('aria-label','Before and after comparison, design ' + v.id.toUpperCase());
