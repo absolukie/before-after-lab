@@ -94,6 +94,42 @@
       box-shadow:0 3px 12px rgba(0,0,0,.5);}
   .dv-f .ba-tab.top{top:34px;} .dv-f .ba-tab.bot{top:calc(100% - 34px);}
   .dv-f .ba-tab svg{width:12px; height:12px; stroke:#fff; stroke-width:2.6; fill:none; stroke-linecap:round; stroke-linejoin:round;}
+  /* ----- round 2: even smaller ----- */
+  .dv-g .ba-line{position:absolute; top:0; bottom:0; left:-0.75px; width:1.5px; background:#fff; box-shadow:0 0 8px rgba(0,0,0,.5);}
+  .dv-g .ba-handle{position:absolute; top:50%; left:0; transform:translate(-50%,-50%);
+      width:14px; height:14px; border-radius:50%; background:#fff;
+      box-shadow:0 1px 8px rgba(0,0,0,.5); transition:transform .18s cubic-bezier(.34,1.56,.64,1);}
+  .dv-g.dragging .ba-handle{transform:translate(-50%,-50%) scale(1.5);}
+  .dv-h .ba-line{position:absolute; top:0; bottom:0; left:-1px; width:2px; background:rgba(255,255,255,.9);
+      box-shadow:0 0 8px rgba(0,0,0,.5); transition:background .18s, box-shadow .18s;}
+  .dv-h .ba-handle{display:none;}
+  .dv-h.dragging .ba-line{background:var(--accent); box-shadow:0 0 18px rgba(232,163,61,.9);}
+  .dv-i .ba-line{position:absolute; top:0; bottom:0; left:-0.75px; width:1.5px; background:rgba(255,255,255,.85);}
+  .dv-i .ba-handle{position:absolute; top:50%; left:0; transform:translate(-50%,-50%);
+      display:flex; align-items:center; gap:0; transition:transform .18s cubic-bezier(.34,1.56,.64,1);}
+  .dv-i .ba-handle svg{width:17px; height:17px; stroke:#fff; stroke-width:3; fill:none;
+      stroke-linecap:round; stroke-linejoin:round; filter:drop-shadow(0 1px 5px rgba(0,0,0,.9));}
+  .dv-i.dragging .ba-handle{transform:translate(-50%,-50%) scale(1.25);}
+  .dv-j .ba-line{position:absolute; top:0; bottom:0; left:-0.75px; width:1.5px; background:rgba(255,255,255,.85);}
+  .dv-j .ba-handle{position:absolute; top:50%; left:0; transform:translate(-50%,-50%);
+      width:26px; height:26px; border-radius:50%; border:1.5px solid #fff; background:transparent;
+      box-shadow:0 1px 8px rgba(0,0,0,.4); transition:transform .18s cubic-bezier(.34,1.56,.64,1);}
+  .dv-j.dragging .ba-handle{transform:translate(-50%,-50%) scale(1.3);}
+  .dv-k .ba-line{position:absolute; top:0; bottom:0; left:-1px; width:2px; background:rgba(255,255,255,.9);}
+  .dv-k .ba-handle{position:absolute; top:50%; left:0; transform:translate(-50%,-50%);
+      width:6px; height:24px; border-radius:999px; background:#fff;
+      box-shadow:0 1px 10px rgba(0,0,0,.55); transition:transform .18s cubic-bezier(.34,1.56,.64,1);}
+  .dv-k.dragging .ba-handle{transform:translate(-50%,-50%) scale(1.35);}
+  .dv-l .ba-line{position:absolute; top:0; bottom:0; left:-1px; width:2px; background:var(--accent);
+      box-shadow:0 0 14px rgba(232,163,61,.75);}
+  .dv-l .ba-handle{position:absolute; top:50%; left:0; transform:translate(-50%,-50%);
+      width:16px; height:16px; border-radius:50%;
+      background:radial-gradient(circle, #ffd9a0 0%, var(--accent) 55%, rgba(232,163,61,0) 75%);
+      transition:transform .18s cubic-bezier(.34,1.56,.64,1);}
+  .dv-l.dragging .ba-handle{transform:translate(-50%,-50%) scale(1.6);}
+  .roundhead{font-family:var(--mono); font-size:12px; letter-spacing:.22em; text-transform:uppercase;
+             color:var(--faint); margin:34px 0 16px;}
+  .roundhead:first-of-type{margin-top:0;}
   .vfoot{display:flex; justify-content:space-between; margin-top:10px; font-size:12.5px; color:var(--faint);}
   footer{margin-top:20px; font-size:13px; color:var(--faint);}
   @media (max-width:480px){ h1{font-size:28px;} .variant{padding:14px;} }
@@ -103,7 +139,7 @@
 <div class="wrap">
   <p class="kicker">Explainer tools · feel lab 02b</p>
   <h1>Dragger designs.</h1>
-  <p class="lede">Six handles on the same slider — same drag physics, same photos. Grab each one and tell me the letter.</p>
+  <p class="lede">Twelve handles on the same slider — same drag physics, same photos. Round 2 is the minimal set. Grab each one and tell me the letter.</p>
   <a class="backlink" href="index.html">← back to the drag feel lab</a>
   <div id="gallery"></div>
   <footer>Six dragger candidates · pick a letter</footer>
@@ -113,18 +149,30 @@
 const CHEV_L = '<svg viewBox="0 0 24 24"><path d="M14 6l-6 6 6 6"/></svg>';
 const CHEV_R = '<svg viewBox="0 0 24 24"><path d="M10 6l6 6-6 6"/></svg>';
 const VARIANTS = [
-  {id:'a', name:'Slim circle', desc:'The current handle, shrunk: 36px circle, 2px line, thinner chevrons.',
+  {round:1, id:'a', name:'Slim circle', desc:'The current handle, shrunk: 36px circle, 2px line, thinner chevrons.',
    handle: CHEV_L + CHEV_R, tabs:false},
-  {id:'b', name:'Pill', desc:'Horizontal pill, 52×32. Lower profile, same grip.',
+  {round:1, id:'b', name:'Pill', desc:'Horizontal pill, 52×32. Lower profile, same grip.',
    handle: CHEV_L + CHEV_R, tabs:false},
-  {id:'c', name:'Accent dot', desc:'No chrome at all — a 22px dot on an amber line. Grows while dragging.',
+  {round:1, id:'c', name:'Accent dot', desc:'No chrome at all — a 22px dot on an amber line. Grows while dragging.',
    handle: '', tabs:false},
-  {id:'d', name:'Glass ring', desc:'Frosted-glass ring, hairline divider. The iOS-native look.',
+  {round:1, id:'d', name:'Glass ring', desc:'Frosted-glass ring, hairline divider. The iOS-native look.',
    handle: CHEV_L + CHEV_R, tabs:false},
-  {id:'e', name:'Grip bar', desc:'Vertical bar with three grip dots — reads as "grab me" without arrows.',
+  {round:1, id:'e', name:'Grip bar', desc:'Vertical bar with three grip dots — reads as "grab me" without arrows.',
    handle: '<i></i><i></i><i></i>', tabs:false},
-  {id:'f', name:'Edge tabs', desc:'No center handle — two small tabs ride the top and bottom edges instead.',
+  {round:1, id:'f', name:'Edge tabs', desc:'No center handle — two small tabs ride the top and bottom edges instead.',
    handle: '', tabs:true},
+  {round:2, id:'g', name:'Hairline dot', desc:'1.5px line, 14px dot. Barely there.',
+   handle: '', tabs:false},
+  {round:2, id:'h', name:'Line only', desc:'No handle at all — the line is the control. Glows amber while dragging.',
+   handle: '', tabs:false},
+  {round:2, id:'i', name:'Floating chevrons', desc:'Just ‹ › sitting on the line. No circle, no background.',
+   handle: CHEV_L + CHEV_R, tabs:false},
+  {round:2, id:'j', name:'Micro ring', desc:'26px empty ring, 1.5px border, nothing inside.',
+   handle: '', tabs:false},
+  {round:2, id:'k', name:'Notch', desc:'A 6×24px tick straddling the line, like a physical slider.',
+   handle: '', tabs:false},
+  {round:2, id:'l', name:'Glow', desc:'Amber luminous line and dot — all glow, no hard chrome.',
+   handle: '', tabs:false},
 ];
 const clamp = (v,a,b) => Math.min(b, Math.max(a,v));
 
@@ -191,15 +239,21 @@ function buildSlider(root, v){
 }
 
 const gal = document.getElementById('gallery');
-VARIANTS.forEach(v => {
-  const card = document.createElement('div');
-  card.className = 'variant';
-  card.innerHTML = '<div class="vhead"><span class="vletter">' + v.id.toUpperCase() +
-    '</span><div><h2>' + v.name + '</h2><p>' + v.desc + '</p></div></div>' +
-    '<div class="ba dv-' + v.id + '"></div>' +
-    '<div class="vfoot"><span>drag · tap to glide · ← → nudge</span><span>design ' + v.id.toUpperCase() + '</span></div>';
-  gal.appendChild(card);
-  buildSlider(card.querySelector('.ba'), v);
+[1, 2].forEach(round => {
+  const head = document.createElement('p');
+  head.className = 'roundhead';
+  head.textContent = round === 1 ? 'Round 1' : 'Round 2 — even smaller';
+  gal.appendChild(head);
+  VARIANTS.filter(v => v.round === round).forEach(v => {
+    const card = document.createElement('div');
+    card.className = 'variant';
+    card.innerHTML = '<div class="vhead"><span class="vletter">' + v.id.toUpperCase() +
+      '</span><div><h2>' + v.name + '</h2><p>' + v.desc + '</p></div></div>' +
+      '<div class="ba dv-' + v.id + '"></div>' +
+      '<div class="vfoot"><span>drag · tap to glide · ← → nudge</span><span>design ' + v.id.toUpperCase() + '</span></div>';
+    gal.appendChild(card);
+    buildSlider(card.querySelector('.ba'), v);
+  });
 });
 </script>
 </body>
